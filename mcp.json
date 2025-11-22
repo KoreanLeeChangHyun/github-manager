@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "github-manager": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/home/deus/github",
+        "run",
+        "github-manager-mcp"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_USERNAME": "KoreanLeeChangHyun"
+      }
+    }
+  }
+}

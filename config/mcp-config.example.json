@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "github-manager": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/github-manager",
+        "run",
+        "github-manager-mcp"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "your_github_token_here",
+        "GITHUB_USERNAME": "your_github_username",
+        "GITHUB_ORG": "optional_org_name",
+        "WORKSPACE_DIR": "/path/to/workspace",
+        "BACKUP_DIR": "/path/to/backups",
+        "RATE_LIMIT_THRESHOLD": "100"
+      }
+    }
+  }
+}
