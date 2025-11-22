@@ -1,187 +1,78 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+FastMCP server for GitHub management. Python 3.10+, PyGithub, GitPython, FastMCP, pytest.
 
-## Project Overview
+## Commands
 
-GitHub Manager is a FastMCP server that provides comprehensive GitHub management capabilities through the Model Context Protocol. It exposes 35+ tools for repository management, automation, workspace operations, and backup/restore functionality.
-
-## Development Commands
-
-### Installation and Setup
 ```bash
-# Install dependencies with uv
-uv pip install -e .
-
-# Install with dev dependencies
+# Install
 uv pip install -e ".[dev]"
 
-# Run installation script
-./install.sh
+# Run server
+uv run github-manager-mcp                          # STDIO mode
+MCP_TRANSPORT=sse uv run github-manager-mcp        # SSE mode (port 8001)
+
+# Test
+uv run pytest                                       # All tests
+uv run pytest tests/test_<module>.py               # Specific module
+
+# Code quality
+uv run black src/ && uv run ruff check src/ && uv run mypy src/
 ```
 
-### Running the Server
+## Code Style Rules
+
+IMPORTANT: Enforce strictly:
+- Line length: 100 max
+- Type hints required (mypy --disallow-untyped-defs)
+- Use `str | None` not `Optional[str]`
+- Import: `Github` from PyGithub, `Repo` from git
+- Catch `GithubException` for API errors
+- Pydantic models for config
+
+## Environment Setup
+
+REQUIRED: `GITHUB_TOKEN`, `GITHUB_USERNAME`
+Optional: `GITHUB_ORG`, `WORKSPACE_DIR`, `BACKUP_DIR`, `RATE_LIMIT_THRESHOLD`
+
+See [.claude/docs/environment.md](.claude/docs/environment.md) for detailed setup.
+
+## Project Structure
+
+```
+src/github_manager/
+├── server.py           # Main server, tool registration
+├── config.py           # Environment config (Pydantic)
+├── repository/         # 8 tools: CRUD, search, topics
+├── automation/         # 13 tools: issues, PRs, workflows
+├── workspace/          # 10 tools: git operations
+└── backup/             # 4 tools: mirror + metadata
+```
+
+## Development Workflow
+
+IMPORTANT: Follow this sequence for ALL code changes:
+
+1. **Code**: Make changes to source files
+2. **Test**: Run `uv run pytest` - Must pass before proceeding
+3. **Quality**: Run `uv run black src/ && uv run ruff check src/ && uv run mypy src/`
+4. **Document**: Update relevant docs in `.claude/docs/` if architecture/config changed
+5. **Commit**: Create commit with clear message
+6. **Push**: Push to remote repository
+
+NEVER skip steps. NEVER commit without passing tests.
+
+## Git Workflow
+
 ```bash
-# Run MCP server
-uv run github-manager-mcp
-
-# Direct Python execution
-python -m github_manager.server
+# After code changes and tests pass
+git add .
+git commit -m "descriptive message"
+git push origin <branch-name>
 ```
 
-### Testing
-```bash
-# Run all tests
-uv run pytest
+## Documentation
 
-# Run with coverage
-uv run pytest --cov=src/github_manager --cov-report=term-missing
-
-# Run specific test file
-uv run pytest tests/test_repository.py
-
-# Run specific test
-uv run pytest tests/test_repository.py::test_list_repositories
-```
-
-### Code Quality
-```bash
-# Format code (line length: 100)
-uv run black src/
-
-# Lint
-uv run ruff check src/
-
-# Type check
-uv run mypy src/
-```
-
-## Architecture
-
-### Core Components
-
-**server.py (src/github_manager/server.py)**
-- Main FastMCP server initialization
-- Creates singleton `Github` client instance via `get_github_client()`
-- Registers all tools from four domain modules
-- Exposes two MCP resources: `config://github` and `status://rate-limit`
-
-**config.py (src/github_manager/config.py)**
-- Pydantic-based configuration management
-- `Config.load()` reads from environment variables (via python-dotenv)
-- Required: `GITHUB_TOKEN`, `GITHUB_USERNAME`
-- Optional: `GITHUB_ORG`, `WORKSPACE_DIR`, `BACKUP_DIR`, `RATE_LIMIT_THRESHOLD`
-
-### Tool Organization
-
-Tools are organized into four domain modules under `src/github_manager/`:
-
-1. **repository/tools.py** (8 tools)
-   - Repository CRUD operations
-   - Search and topic management
-   - Uses PyGithub's `client.get_repo()`, `client.get_user().get_repos()`
-
-2. **automation/tools.py** (13 tools)
-   - Issues, PRs, releases, labels, workflows
-   - Uses PyGithub's repository methods like `repo.get_issues()`, `repo.get_pulls()`
-   - Workflow runs via `repo.get_workflow_runs()`
-
-3. **workspace/tools.py** (10 tools)
-   - Local git operations using GitPython
-   - Clones repos to `WORKSPACE_DIR`
-   - Path resolution: accepts relative paths (to workspace) or absolute paths
-   - Uses `Repo` class from `git` module
-
-4. **backup/tools.py** (4 tools)
-   - Creates mirror clones + JSON metadata (issues, PRs, releases)
-   - Backup structure: `BACKUP_DIR/<repo_name>/<timestamp>/`
-   - Metadata stored as JSON files for programmatic access
-
-### Tool Setup Pattern
-
-Each domain module exports a `setup_*_tools(mcp, get_client)` function that:
-- Takes FastMCP instance and a `get_client` callable
-- Decorates functions with `@mcp.tool()` to register them
-- Returns formatted strings for display in MCP clients
-
-### Configuration Flow
-
-1. `.env` file loaded by `python-dotenv` when `config.py` imports
-2. `Config.load()` called in `server.py` on first `get_github_client()` call
-3. Global `config` and `github_client` cached in `server.py`
-4. Environment variables override defaults in Pydantic models
-
-### GitHub API Interaction
-
-- All GitHub API calls use PyGithub (imported as `Github`)
-- Single authenticated client shared across all tools
-- Error handling: catches `GithubException` and returns formatted error messages
-- Rate limiting checked via `client.get_rate_limit()` resource
-
-### Workspace Management
-
-- Default workspace: `~/workspace`
-- Repositories stored as: `WORKSPACE_DIR/<repo_name>/`
-- Operations check for `.git` directory to identify repos
-- Status tracking uses GitPython's `repo.is_dirty()`, `repo.active_branch`
-
-### Backup Structure
-
-```
-BACKUP_DIR/
-├── <repo_name>/
-│   └── <timestamp>/
-│       ├── repository/     # Mirror clone
-│       └── metadata/       # JSON files
-│           ├── repository.json
-│           ├── issues.json
-│           ├── pull_requests.json
-│           └── releases.json
-```
-
-## Environment Configuration
-
-Required for MCP server operation:
-- `GITHUB_TOKEN`: Fine-grained token with `repo` (read/write), `workflow` scopes
-- `GITHUB_USERNAME`: For default user operations
-
-The server will fail on startup if these are missing (raises `ValueError` from config.py:27, 31).
-
-## Code Style
-
-- Line length: 100 characters (enforced by Black and Ruff)
-- Type hints required: `mypy --disallow-untyped-defs`
-- Python 3.10+ compatible
-- Use `str | None` instead of `Optional[str]` (modern union syntax)
-
-## MCP Integration
-
-To use as MCP server in Claude Code (STDIO mode):
-```json
-{
-  "mcpServers": {
-    "github-manager": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/repo", "run", "github-manager-mcp"],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
-        "GITHUB_USERNAME": "username"
-      }
-    }
-  }
-}
-```
-
-To run in SSE mode (network access):
-```bash
-# Default port 8001
-MCP_TRANSPORT=sse uv run github-manager-mcp
-
-# Custom port
-MCP_TRANSPORT=sse MCP_PORT=3000 uv run github-manager-mcp
-
-# Or use the start script
-./start_sse.sh --port 8001
-```
-
-Server will be available at: http://localhost:8001/sse
+For detailed information, see:
+- [Architecture](.claude/docs/architecture.md) - Components, tool organization, data flow
+- [Environment](.claude/docs/environment.md) - Configuration, MCP setup, security
