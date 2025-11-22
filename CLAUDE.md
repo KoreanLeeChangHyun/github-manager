@@ -64,10 +64,16 @@ NEVER skip steps. NEVER commit without passing tests.
 
 ## Git Workflow
 
+IMPORTANT: Commit message rules:
+- Write in Korean (한국어로 작성)
+- NEVER add Co-Authored-By or emoji
+- Format: `<type>: <description>`
+- Types: feat, fix, docs, refactor, test, chore
+
 ```bash
 # After code changes and tests pass
 git add .
-git commit -m "descriptive message"
+git commit -m "docs: 문서 업데이트"
 git push origin <branch-name>
 ```
 
