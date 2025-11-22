@@ -33,7 +33,7 @@ Comprehensive GitHub management MCP server built with FastMCP. Manage repositori
 ## Installation
 
 ### Prerequisites
-- Python 3.9+
+- Python 3.10+
 - [uv](https://docs.astral.sh/uv/) package manager
 - GitHub personal access token
 
