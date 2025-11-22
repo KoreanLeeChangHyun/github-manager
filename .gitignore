@@ -57,3 +57,4 @@ logs/
 # Claude Code
 .claude/
 !.claude/docs/
+!.claude/skills/
