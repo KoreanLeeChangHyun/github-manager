@@ -83,6 +83,65 @@ Search API:
 """
 
 
+@mcp.resource("docs://tools")
+def get_tools_documentation() -> str:
+    """Get list of all available tools with descriptions."""
+    tools = mcp._tool_manager._tools
+
+    categories = {
+        'Repository Management (8 tools)': [
+            'list_repositories', 'get_repository_info', 'create_repository',
+            'update_repository', 'delete_repository', 'search_repositories',
+            'get_repository_topics', 'set_repository_topics'
+        ],
+        'Issues (3 tools)': [
+            'list_issues', 'create_issue', 'close_issue'
+        ],
+        'Pull Requests (3 tools)': [
+            'list_pull_requests', 'create_pull_request', 'merge_pull_request'
+        ],
+        'Releases (2 tools)': [
+            'list_releases', 'create_release'
+        ],
+        'Labels (2 tools)': [
+            'list_labels', 'create_label'
+        ],
+        'Workflows (1 tool)': [
+            'list_workflow_runs'
+        ],
+        'Workspace (8 tools)': [
+            'list_workspace_repos', 'clone_repository', 'pull_repository',
+            'get_repository_status', 'sync_all_repositories', 'delete_workspace_repo',
+            'create_branch', 'switch_branch'
+        ],
+        'Backup (4 tools)': [
+            'backup_repository', 'backup_all_repositories',
+            'list_backups', 'restore_repository'
+        ],
+    }
+
+    result = ["GitHub Manager MCP Server - Tools Documentation", "=" * 70, ""]
+
+    for category, tool_names in categories.items():
+        result.append(f"\n{category}")
+        result.append("-" * 70)
+        for tool_name in tool_names:
+            if tool_name in tools:
+                func = tools[tool_name]
+                doc = func.__doc__ or "No description available"
+                first_line = doc.strip().split('\n')[0]
+                result.append(f"  • {tool_name}")
+                result.append(f"    {first_line}")
+
+    result.append(f"\nTotal: 31 tools across 8 categories")
+    result.append("\nResources:")
+    result.append("  • config://github - View current configuration")
+    result.append("  • status://rate-limit - Check GitHub API rate limits")
+    result.append("  • docs://tools - This documentation")
+
+    return "\n".join(result)
+
+
 def main() -> None:
     """Run the MCP server.
 
