@@ -112,13 +112,32 @@ See `config/mcp-config.example.json` for a complete example.
 
 ### Running the Server
 
-```bash
-# Using uv
-uv run github-manager-mcp
+#### STDIO Mode (for Claude Code)
 
-# Or if installed
-github-manager-mcp
+```bash
+# Default mode - STDIO transport
+uv run github-manager-mcp
 ```
+
+#### SSE Mode (for network access / other LLMs)
+
+```bash
+# Start SSE server on port 8000
+./start_sse.sh
+
+# Or with custom port
+./start_sse.sh --port 3000
+
+# Or using environment variables
+MCP_TRANSPORT=sse MCP_PORT=8000 uv run github-manager-mcp
+
+# Or using command line arguments
+uv run github-manager-mcp --transport sse --port 8000
+```
+
+Server will be available at: `http://localhost:8000/sse`
+
+**For other LLMs (ChatGPT, Gemini, etc.)**: See [docs/connecting-llms.md](docs/connecting-llms.md) for connection guide.
 
 ### Available Tools
 
