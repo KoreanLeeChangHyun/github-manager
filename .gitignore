@@ -58,3 +58,4 @@ logs/
 .claude/
 !.claude/docs/
 !.claude/skills/
+!.claude/agents/
