@@ -91,12 +91,12 @@ def main() -> None:
     - Command line: --transport sse or --transport stdio
 
     For SSE mode, port can be set via:
-    - Environment variable: MCP_PORT=8000 (default)
-    - Command line: --port 8000
+    - Environment variable: MCP_PORT=8001 (default)
+    - Command line: --port 8001
     """
     # Parse command line arguments
     transport = "stdio"  # default
-    port = 8000  # default
+    port = 8001  # default
     host = "0.0.0.0"  # default
 
     # Check environment variables
@@ -104,7 +104,7 @@ def main() -> None:
         transport = os.getenv("MCP_TRANSPORT", "stdio").lower()
 
     if os.getenv("MCP_PORT"):
-        port = int(os.getenv("MCP_PORT", "8000"))
+        port = int(os.getenv("MCP_PORT", "8001"))
 
     if os.getenv("MCP_HOST"):
         host = os.getenv("MCP_HOST", "0.0.0.0")

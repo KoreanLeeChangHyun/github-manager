@@ -5,17 +5,17 @@
 ### SSE 모드로 시작 (네트워크 접근 가능)
 
 ```bash
-# 기본 포트 8000으로 시작
+# 기본 포트 8001으로 시작
 ./start_sse.sh
 
 # 또는 커스텀 포트
 ./start_sse.sh --port 3000
 
 # 또는 직접 실행
-MCP_TRANSPORT=sse MCP_PORT=8000 uv run github-manager-mcp
+MCP_TRANSPORT=sse MCP_PORT=8001 uv run github-manager-mcp
 ```
 
-서버 URL: **http://localhost:8000/sse**
+서버 URL: **http://localhost:8001/sse**
 
 ## 연결 방법
 
@@ -35,7 +35,7 @@ async def connect_to_mcp_server():
     async with httpx.AsyncClient() as client:
         async with client.stream(
             "GET",
-            "http://localhost:8000/sse",
+            "http://localhost:8001/sse",
             headers={"Accept": "text/event-stream"}
         ) as response:
             async for line in response.aiter_lines():
@@ -48,7 +48,7 @@ async def connect_to_mcp_server():
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 
-async with sse_client("http://localhost:8000/sse") as (read, write):
+async with sse_client("http://localhost:8001/sse") as (read, write):
     async with ClientSession(read, write) as session:
         # Initialize
         await session.initialize()
@@ -85,7 +85,7 @@ mcp_session = None
 async def startup():
     """MCP 서버에 연결"""
     global mcp_session
-    async with sse_client("http://localhost:8000/sse") as (read, write):
+    async with sse_client("http://localhost:8001/sse") as (read, write):
         mcp_session = ClientSession(read, write)
         await mcp_session.initialize()
 
@@ -191,7 +191,7 @@ MCP 프로토콜 없이 직접 사용하려면 SSE 엔드포인트로 요청:
 
 ```bash
 # SSE 스트림 연결
-curl -N -H "Accept: text/event-stream" http://localhost:8000/sse
+curl -N -H "Accept: text/event-stream" http://localhost:8001/sse
 ```
 
 하지만 이 방식은 MCP 프로토콜을 구현해야 하므로 복잡합니다.
@@ -221,7 +221,7 @@ curl -N -H "Accept: text/event-stream" http://localhost:8000/sse
 | 모드 | 포트 | 네트워크 접근 | 용도 |
 |------|------|---------------|------|
 | **STDIO** | 없음 | 불가능 | Claude Code 로컬 전용 |
-| **SSE** | 8000 | 가능 | 네트워크 환경, 여러 클라이언트 |
+| **SSE** | 8001 | 가능 | 네트워크 환경, 여러 클라이언트 |
 
 ## 보안 고려사항
 
@@ -233,10 +233,10 @@ SSE 모드로 실행 시:
 
 ```bash
 # 로컬에서만 접근 가능하게
-MCP_HOST=127.0.0.1 MCP_PORT=8000 uv run github-manager-mcp
+MCP_HOST=127.0.0.1 MCP_PORT=8001 uv run github-manager-mcp
 
 # 모든 네트워크에서 접근 가능 (주의!)
-MCP_HOST=0.0.0.0 MCP_PORT=8000 uv run github-manager-mcp
+MCP_HOST=0.0.0.0 MCP_PORT=8001 uv run github-manager-mcp
 ```
 
 ## 예제 프로젝트

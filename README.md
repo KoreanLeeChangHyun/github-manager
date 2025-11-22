@@ -122,20 +122,20 @@ uv run github-manager-mcp
 #### SSE Mode (for network access / other LLMs)
 
 ```bash
-# Start SSE server on port 8000
+# Start SSE server on port 8001
 ./start_sse.sh
 
 # Or with custom port
 ./start_sse.sh --port 3000
 
 # Or using environment variables
-MCP_TRANSPORT=sse MCP_PORT=8000 uv run github-manager-mcp
+MCP_TRANSPORT=sse MCP_PORT=8001 uv run github-manager-mcp
 
 # Or using command line arguments
-uv run github-manager-mcp --transport sse --port 8000
+uv run github-manager-mcp --transport sse --port 8001
 ```
 
-Server will be available at: `http://localhost:8000/sse`
+Server will be available at: `http://localhost:8001/sse`
 
 **For other LLMs (ChatGPT, Gemini, etc.)**: See [docs/connecting-llms.md](docs/connecting-llms.md) for connection guide.
 

@@ -156,7 +156,7 @@ The server will fail on startup if these are missing (raises `ValueError` from c
 
 ## MCP Integration
 
-To use as MCP server in Claude Code:
+To use as MCP server in Claude Code (STDIO mode):
 ```json
 {
   "mcpServers": {
@@ -171,3 +171,17 @@ To use as MCP server in Claude Code:
   }
 }
 ```
+
+To run in SSE mode (network access):
+```bash
+# Default port 8001
+MCP_TRANSPORT=sse uv run github-manager-mcp
+
+# Custom port
+MCP_TRANSPORT=sse MCP_PORT=3000 uv run github-manager-mcp
+
+# Or use the start script
+./start_sse.sh --port 8001
+```
+
+Server will be available at: http://localhost:8001/sse

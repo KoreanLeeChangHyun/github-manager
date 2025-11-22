@@ -28,7 +28,7 @@ app = FastAPI(
 )
 
 # MCP server URL
-MCP_SERVER_URL = "http://localhost:8000/sse"
+MCP_SERVER_URL = "http://localhost:8001/sse"
 
 
 class ToolCallRequest(BaseModel):

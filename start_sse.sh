@@ -7,7 +7,7 @@ echo "🚀 Starting GitHub Manager MCP Server (SSE mode)..."
 echo ""
 
 # Default values
-PORT=${MCP_PORT:-8000}
+PORT=${MCP_PORT:-8001}
 HOST=${MCP_HOST:-0.0.0.0}
 
 # Parse command line arguments
